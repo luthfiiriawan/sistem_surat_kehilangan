@@ -89,6 +89,57 @@
         .confirm-modal .modal-footer { border-top:1px solid rgba(203,213,225,0.9); padding:1.25rem 2rem 1.75rem; gap:0.75rem; justify-content:center; }
         .confirm-modal .modal-footer .btn { min-width:160px; padding:0.75rem 1.5rem; font-size:1rem; }
         .confirm-modal .confirm-icon { width:80px; height:80px; border-radius:20px; background:rgba(220,38,38,0.1); color:var(--accent-color); display:flex; align-items:center; justify-content:center; font-size:2.5rem; margin:0 auto 1.5rem; }
+        /* Preview Modal */
+        .preview-modal .modal-dialog { max-width: 850px; }
+        .preview-modal .modal-content { border: none; border-radius: 24px; overflow: hidden; box-shadow: 0 20px 60px rgba(15,23,42,0.15); }
+        .preview-modal .modal-header { background: #f8fafc; border-bottom: 1px solid rgba(203,213,225,0.9); padding: 1.25rem 1.75rem; }
+        .preview-modal .modal-title { font-family: 'Outfit',sans-serif; font-weight: 700; color: var(--primary-color); }
+        .preview-modal .modal-body { padding: 2rem; background: #e2e8f0; }
+        #surat-preview-container {
+            background: #fff;
+            padding: 2.2in 0.5in 1.5in 1.125in;
+            min-height: 800px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+            border-radius: 12px;
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 11pt;
+            line-height: 1.35;
+            color: #000000;
+            box-sizing: border-box;
+            background-color: #ffffff;
+            position: relative;
+        }
+        #surat-preview-container * {
+            font-family: 'Times New Roman', Times, serif;
+            color: #000000;
+        }
+        #surat-preview-container p {
+            margin-bottom: 8pt;
+            text-align: justify;
+        }
+        #surat-preview-container .preview-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 10pt;
+        }
+        #surat-preview-container .preview-table td {
+            border: none;
+            padding: 2px 0;
+            vertical-align: top;
+        }
+        #surat-preview-container .list-indented {
+            margin-left: 0.5in;
+            margin-bottom: 10pt;
+            list-style: none;
+            padding-left: 0;
+        }
+        #surat-preview-container .list-indented li {
+            position: relative;
+            padding-left: 0.25in;
+            text-indent: -0.25in;
+            text-align: justify;
+            margin-bottom: 6pt;
+        }
     </style>
 </head>
 <body>
@@ -104,7 +155,6 @@
                     <p class="mb-0 small text-white-50">Sistem Surat Kehilangan Bid TIK POLRI</p>
                 </div>
             </div>
-            <a href="{{ route('surat-kehilangan.index') }}" class="btn btn-outline-light"><i class="bi bi-arrow-left me-2"></i>Kembali</a>
         </div>
     </div>
 </header>
@@ -267,6 +317,7 @@
         </div>
 
         <div class="d-flex gap-2">
+            <button type="button" id="btn-preview-surat" class="btn btn-outline-primary px-4"><i class="bi bi-eye me-2"></i>Preview Surat</button>
             <button type="button" id="btn-simpan-laporan" class="btn btn-accent px-4">Simpan Laporan</button>
             <a href="{{ route('surat-kehilangan.index') }}" class="btn btn-secondary">Batal</a>
         </div>
@@ -294,11 +345,173 @@
     </div>
 </div>
 
+<div class="modal fade preview-modal" id="preview-surat-modal" tabindex="-1" aria-labelledby="preview-surat-title" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="preview-surat-title">Preview Surat Kehilangan</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+            </div>
+            <div class="modal-body">
+                <div id="surat-preview-container">
+                    <!-- Kop Surat / Header -->
+                    <div style="display: flex; align-items: flex-start; justify-content: flex-start; border-bottom: 2.5px double #000000; padding-bottom: 10px; margin-bottom: 20px; position: relative;">
+                        <div style="position: absolute; left: 0; top: 0;">
+                            <img src="{{ asset('images/logo_tik_polri.png') }}" style="width: 75px; height: auto;" alt="Logo TIK">
+                        </div>
+                        <div style="width: 100%; text-align: center; font-weight: bold; font-size: 11pt; line-height: 1.25; text-transform: uppercase; padding-left: 80px; padding-right: 20px;">
+                            <div>KEPOLISIAN NEGARA REPUBLIK INDONESIA</div>
+                            <div>DAERAH JAWA BARAT</div>
+                            <div style="text-decoration: underline;">BIDANG TEKNOLOGI INFORMASI DAN KOMUNIKASI</div>
+                        </div>
+                    </div>
+
+                    <!-- Surat Title & Nomor -->
+                    <div style="text-align: center; margin-top: 25px; margin-bottom: 25px;">
+                        <h4 style="font-size: 13pt; font-weight: bold; text-decoration: underline; margin-bottom: 2px; text-transform: uppercase;">SURAT KETERANGAN HASIL PENGECEKAN</h4>
+                        <p style="font-size: 11pt; margin: 0; text-align: center;">Nomor : SKET/ &nbsp; &nbsp; &nbsp; <span id="preview-nomer-surat">-</span> &nbsp; &nbsp; &nbsp; /<span id="preview-bulan">-</span>/YAN 2.4/<span id="preview-tahun">-</span></p>
+                    </div>
+
+                    <!-- Opening paragraph -->
+                    <p style="text-indent: 0.5in; margin-bottom: 15px; text-align: justify;">Kepala Bidang Teknologi Informasi Dan Komunikasi Polda Jabar dengan ini menerangkan bahwa kendaraan bermotor dengan identitas sebagai berikut :</p>
+
+                    <!-- Identitas Kendaraan -->
+                    <table class="preview-table" style="margin-left: 0.5in; width: calc(100% - 0.5in);">
+                        <tr>
+                            <td style="width: 4%;">1.</td>
+                            <td style="width: 32%;">Nomor polisi</td>
+                            <td style="width: 3%;">:</td>
+                            <td style="font-weight: bold; text-transform: uppercase;"><span id="preview-nopo">-</span></td>
+                        </tr>
+                        <tr>
+                            <td>2.</td>
+                            <td>Merk/ type</td>
+                            <td>:</td>
+                            <td><span id="preview-merk">-</span></td>
+                        </tr>
+                        <tr>
+                            <td>3.</td>
+                            <td>Jenis/model</td>
+                            <td>:</td>
+                            <td><span id="preview-jenis">-</span></td>
+                        </tr>
+                        <tr>
+                            <td>4.</td>
+                            <td>Tahun pembuatan</td>
+                            <td>:</td>
+                            <td><span id="preview-tahun-pembuatan">-</span></td>
+                        </tr>
+                        <tr>
+                            <td>5.</td>
+                            <td>Warna</td>
+                            <td>:</td>
+                            <td><span id="preview-warna">-</span></td>
+                        </tr>
+                        <tr>
+                            <td>6.</td>
+                            <td>Nomor rangka</td>
+                            <td>:</td>
+                            <td style="font-weight: bold; text-transform: uppercase;"><span id="preview-nomor-rangka">-</span></td>
+                        </tr>
+                        <tr>
+                            <td>7.</td>
+                            <td>Nomor mesin</td>
+                            <td>:</td>
+                            <td style="font-weight: bold; text-transform: uppercase;"><span id="preview-nomor-mesin">-</span></td>
+                        </tr>
+                        <tr>
+                            <td>8.</td>
+                            <td>Nomor BPKB</td>
+                            <td>:</td>
+                            <td style="font-weight: bold; text-transform: uppercase;"><span id="preview-bpkb">-</span></td>
+                        </tr>
+                    </table>
+
+                    <!-- Statement -->
+                    <p style="text-indent: 0.5in; margin-bottom: 15px; text-align: justify;">Setelah dilakukan pengecekan identitas kendaraan bermotor tersebut di atas dengan database ranmor hiltem yang ada pada Subbid Tek Info Bid TIK Polda Jabar, diterangkan bahwa hasil pengecekan identitas kendaraan dimaksud <span style="font-weight: bold;">TIDAK TERDAPAT</span> pada database Ranmor Hiltem.</p>
+
+                    <!-- Basis Laporan -->
+                    <p style="margin-bottom: 10px;">Surat keterangan ini dibuat berdasarkan :</p>
+                    <ul class="list-indented">
+                        <li>a. Juknis Kapolri No.Pol.: Juknis 05/V/1984, tanggal 17 Mei 1984 tentang Sispulahjianta, kendaraan hilang, diketemukan, dicurigai dan rusak berat;</li>
+                        <li>b. Surat keterangan tanda bukti melapor kehilangan barang dari <span id="preview-polres" style="font-weight: bold;">-</span> Nomor : <span id="preview-nomor-surat-keterangan" style="font-weight: bold;">-</span>, tanggal <span id="preview-tanggal-lapor" style="font-weight: bold;">-</span> tentang kehilangan <span id="preview-jenissurat" style="font-weight: bold;">-</span> asli.</li>
+                    </ul>
+
+                    <!-- Closing paragraph -->
+                    <p style="text-indent: 0.5in; margin-bottom: 35px; text-align: justify;">Demikian surat keterangan ini dibuat dengan sebenarnya dan dipergunakan untuk kelengkapan persyaratan administrasi dalam pembuatan duplikat <span id="preview-jenis-surat" style="font-weight: bold;">-</span>.</p>
+
+                    <!-- Signatures / Footer -->
+                    <div style="display: flex; justify-content: flex-end; margin-top: 15px;">
+                        <div style="width: 320px; font-size: 11pt; line-height: 1.35; position: relative;">
+                            <div>Bandung, &nbsp; <span id="preview-tanggal-ttd">-</span></div>
+                            <div style="font-weight: bold; text-transform: uppercase; margin-top: 2px;">a.n. KABID TIK POLDA JABAR</div>
+                            <div style="font-weight: bold; text-transform: uppercase; padding-left: 20px;">KASUBBID TEK INFO</div>
+                            
+                            <!-- Stamp and Signature Image Overlay -->
+                            <div style="margin-top: -15px; margin-bottom: -35px; margin-left: -10px; position: relative; z-index: 1;">
+                                <img src="{{ asset('images/image2.png') }}" style="width: 250px; height: auto;" alt="Tanda Tangan & Stempel">
+                            </div>
+                            
+                            <div style="font-weight: bold; text-decoration: underline; position: relative; z-index: 2; margin-top: 5px;">ALI SADIKIN, S.H, M.A.P, M.Si.</div>
+                            <div style="font-weight: bold; position: relative; z-index: 2;">AKBP NRP 71100520</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
+    function formatTanggalIndonesia(dateStr) {
+        if (!dateStr) return '-';
+        const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+        const date = new Date(dateStr + 'T00:00:00');
+        const day = date.getDate();
+        const month = months[date.getMonth()];
+        const year = date.getFullYear();
+        return `${day} ${month} ${year}`;
+    }
+
+    function updatePreview() {
+        // Get form field values
+        document.getElementById('preview-nomer-surat').textContent = document.querySelector('input[name="nomer_surat"]').value || '-';
+        document.getElementById('preview-bulan').textContent = document.querySelector('select[name="bulan"]').value || '-';
+        document.getElementById('preview-tahun').textContent = document.querySelector('input[name="tahun"]').value || '-';
+        
+        document.getElementById('preview-nopo').textContent = (document.querySelector('input[name="nopo"]').value || '-').toUpperCase();
+        document.getElementById('preview-merk').textContent = document.querySelector('input[name="merk"]').value || '-';
+        document.getElementById('preview-jenis').textContent = document.querySelector('input[name="jenis"]').value || '-';
+        document.getElementById('preview-tahun-pembuatan').textContent = document.querySelector('input[name="tahun_pembuatan"]').value || '-';
+        document.getElementById('preview-warna').textContent = document.querySelector('input[name="warna"]').value || '-';
+        document.getElementById('preview-nomor-rangka').textContent = (document.querySelector('input[name="nomor_rangka"]').value || '-').toUpperCase();
+        document.getElementById('preview-nomor-mesin').textContent = (document.querySelector('input[name="nomor_mesin"]').value || '-').toUpperCase();
+        document.getElementById('preview-bpkb').textContent = (document.querySelector('input[name="bpkb"]').value || '-').toUpperCase();
+        
+        document.getElementById('preview-polres').textContent = document.querySelector('select[name="polres"]').value || '-';
+        document.getElementById('preview-nomor-surat-keterangan').textContent = document.querySelector('input[name="nomor_surat_keterangan"]').value || '-';
+        
+        document.getElementById('preview-tanggal-lapor').textContent = formatTanggalIndonesia(document.querySelector('input[name="tanggal_tahun_lapor"]').value);
+        
+        // Get jenis surat value
+        let jenisSuratVal = document.getElementById('jenissurat-value').value;
+        if (jenisSuratVal === 'Lainnya') {
+            jenisSuratVal = document.getElementById('jenissurat-custom').value;
+        }
+        document.getElementById('preview-jenis-surat').textContent = jenisSuratVal || '-';
+        document.getElementById('preview-jenissurat').textContent = jenisSuratVal || '-';
+        
+        document.getElementById('preview-tanggal-ttd').textContent = formatTanggalIndonesia(document.querySelector('input[name="taggalttd"]').value);
+    }
+
     function syncJenisSuratFields(value) {
         document.getElementById('jenissurat-value').value = value;
         document.getElementById('jenis-surat-value').value = value;
+        updatePreview(); // Update preview whenever jenis surat changes
     }
 
     function onJenisSuratChange(value) {
@@ -343,6 +556,18 @@
     document.addEventListener('DOMContentLoaded', function () {
         const select = document.getElementById('jenissurat-select');
         select.style.color = '#9ca3af';
+
+        // Add input event listeners to all form fields for real-time preview
+        const formFields = document.querySelectorAll('#form-surat input, #form-surat select');
+        formFields.forEach(field => {
+            field.addEventListener('input', updatePreview);
+            field.addEventListener('change', updatePreview);
+        });
+    });
+
+    document.getElementById('btn-preview-surat').addEventListener('click', function () {
+        updatePreview(); // Ensure preview is up-to-date
+        new bootstrap.Modal(document.getElementById('preview-surat-modal')).show();
     });
 
     document.getElementById('btn-simpan-laporan').addEventListener('click', function () {

@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreSuratKehilanganRequest;
 use App\Models\SuratKehilangan;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use PhpOffice\PhpWord\TemplateProcessor;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
@@ -27,8 +26,8 @@ class SuratKehilanganController extends Controller
         }
 
         if ($request->filled('start_date') && $request->filled('end_date')) {
-            $query->whereDate('created_at', '>=', $request->input('start_date'))
-                ->whereDate('created_at', '<=', $request->input('end_date'));
+            $query->whereDate('tanggal_tahun_lapor', '>=', $request->input('start_date'))
+                ->whereDate('tanggal_tahun_lapor', '<=', $request->input('end_date'));
         }
 
         $surats = $query->latest()->get();
@@ -51,6 +50,11 @@ class SuratKehilanganController extends Controller
                   ->orWhere('bpkb', 'like', "%{$keyword}%")
                   ->orWhere('merk', 'like', "%{$keyword}%");
             });
+        }
+
+        if ($request->filled('start_date') && $request->filled('end_date')) {
+            $query->whereDate('tanggal_tahun_lapor', '>=', $request->input('start_date'))
+                ->whereDate('tanggal_tahun_lapor', '<=', $request->input('end_date'));
         }
 
         $surats = $query->latest()->get()->map(function ($surat) use ($keyword) {
@@ -170,8 +174,8 @@ class SuratKehilanganController extends Controller
         }
 
         if ($request->filled('start_date') && $request->filled('end_date')) {
-            $query->whereDate('created_at', '>=', $request->input('start_date'))
-                ->whereDate('created_at', '<=', $request->input('end_date'));
+            $query->whereDate('tanggal_tahun_lapor', '>=', $request->input('start_date'))
+                ->whereDate('tanggal_tahun_lapor', '<=', $request->input('end_date'));
         }
 
         $rows = $query->orderBy('id')->get();
@@ -185,9 +189,10 @@ class SuratKehilanganController extends Controller
         $sheet->setCellValue('A1', 'DATA SURAT KETERANGAN KEHILANGAN');
         $sheet->mergeCells('A1:J1');
 
-        $sheet->fromArray($rows->map(function ($row) {
+        $counter = 1;
+        $sheet->fromArray($rows->map(function ($row) use (&$counter) {
             return [
-                $row->id,
+                $counter++,
                 $row->polres,
                 $row->nopo,
                 $row->merk,
@@ -200,9 +205,12 @@ class SuratKehilanganController extends Controller
             ];
         })->toArray(), null, 'A3');
 
-        $tmpPath = storage_path('app/temp/' . uniqid('excel_', true) . '.xlsx');
-        Storage::disk('local')->makeDirectory('temp');
-        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+        $tempDir = storage_path('app/temp');
+        if (!is_dir($tempDir)) {
+            mkdir($tempDir, 0755, true);
+        }
+        $tmpPath = $tempDir . '/' . uniqid('excel_', true) . '.xlsx';
+        $writer = new Xlsx($spreadsheet);
         $writer->save($tmpPath);
 
         return response()->download($tmpPath, 'DataSuratKehilangan.xlsx')->deleteFileAfterSend(true);

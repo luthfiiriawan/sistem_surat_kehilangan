@@ -56,8 +56,43 @@
         .filter-dropdown-panel { position: absolute; right: 0; top: calc(100% + 12px); width: 340px; background: #fff; border: 1px solid #e5e7eb; border-radius: 20px; box-shadow: 0 20px 60px rgba(15,23,42,0.16); padding: 20px; z-index: 20; display: none; }
         .filter-dropdown-panel.show { display: block; }
         .filter-dropdown-panel h6 { font-size: 0.85rem; letter-spacing: .08em; text-transform: uppercase; color: #6b7280; margin-bottom: 16px; }
-        .preset-list button { width: 100%; text-align: left; border-radius: 12px; padding: 12px 14px; border: 1px solid #e5e7eb; background: #fff; color: #111827; }
-        .preset-list button:hover { background: #f8fafc; }
+        .preset-list button { width: 100%; text-align: left; border-radius: 12px; padding: 12px 14px; border: 1px solid #e5e7eb; background: #fff; color: #111827; transition: all 0.2s ease; }
+        .preset-list button:hover { background: #f8fafc; border-color: #d1d5db; }
+        .preset-list button.active { background: linear-gradient(135deg, var(--accent-color), var(--accent-hover)); color: #fff; border-color: var(--accent-color); font-weight: 600; box-shadow: 0 4px 12px rgba(220,38,38,0.25); }
+        .preset-list button.active:hover { background: linear-gradient(135deg, var(--accent-hover), #991b1b); color: #fff; }
+        .filter-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(220, 38, 38, 0.08);
+            border: 1.5px solid rgba(220, 38, 38, 0.3);
+            color: var(--accent-color);
+            border-radius: 50px;
+            padding: 6px 14px 6px 12px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            white-space: nowrap;
+            animation: fadeIn 0.2s ease;
+        }
+        .filter-badge .badge-clear {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--accent-color);
+            color: #fff;
+            font-size: 0.7rem;
+            cursor: pointer;
+            border: none;
+            padding: 0;
+            line-height: 1;
+            transition: background 0.15s ease;
+            flex-shrink: 0;
+        }
+        .filter-badge .badge-clear:hover { background: var(--accent-hover); }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.92); } to { opacity: 1; transform: scale(1); } }
         .table-premium thead th { background: #081c3c; color: #fff; font-size: 0.82rem; text-transform: uppercase; letter-spacing: .5px; border-color: rgba(255,255,255,.08); }
         .table-premium td { vertical-align: middle; }
         .table-premium td.no-surat-cell { max-width: 285px; white-space: normal; word-break: break-word; padding-right: 0.8rem; }
@@ -83,6 +118,44 @@
         .feedback-modal .modal-footer { border-top: 1px solid rgba(203, 213, 225, 0.9); padding: 1.25rem 2rem 1.75rem; justify-content: center; }
         .feedback-modal .modal-footer .btn { min-width: 160px; padding: 0.75rem 1.5rem; font-size: 1rem; }
         .feedback-modal .feedback-icon { width: 80px; height: 80px; border-radius: 20px; background: rgba(22, 163, 74, 0.12); color: #16a34a; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; margin: 0 auto 1.5rem; }
+        .confirm-modal .modal-dialog { max-width: 560px; }
+        .confirm-modal .modal-content { border: none; border-radius: 24px; overflow: hidden; box-shadow: 0 24px 80px rgba(15, 23, 42, 0.2); }
+        .confirm-modal .modal-header { background: #f8fafc; border-bottom: 1px solid rgba(203, 213, 225, 0.9); padding: 1.5rem 2rem; }
+        .confirm-modal .modal-title { font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 1.35rem; color: var(--primary-color); }
+        .confirm-modal .modal-body { padding: 2rem 2.25rem 2.25rem; color: #4b5563; line-height: 1.7; text-align: center; }
+        .confirm-modal .modal-body p { font-size: 1.05rem; }
+        .confirm-modal .modal-body .fw-semibold { font-size: 1.15rem; }
+        .confirm-modal .modal-footer { border-top: 1px solid rgba(203, 213, 225, 0.9); padding: 1.25rem 2rem 1.75rem; gap: 0.75rem; justify-content: center; }
+        .confirm-modal .modal-footer .btn { min-width: 160px; padding: 0.75rem 1.5rem; font-size: 1rem; }
+        .confirm-modal .confirm-icon { width: 80px; height: 80px; border-radius: 20px; background: rgba(220, 38, 38, 0.1); color: var(--accent-color); display: flex; align-items: center; justify-content: center; font-size: 2.5rem; margin: 0 auto 1.5rem; }
+        .premium-pagination .page-link {
+            color: var(--primary-color);
+            border: 1px solid var(--border-color);
+            margin: 0 3px;
+            padding: 8px 14px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            border-radius: 10px !important;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(15,23,42,0.02);
+        }
+        .premium-pagination .page-link:hover {
+            background-color: var(--primary-light);
+            color: #fff;
+            border-color: var(--primary-light);
+        }
+        .premium-pagination .page-item.active .page-link {
+            background: linear-gradient(135deg, var(--accent-color), var(--accent-hover));
+            border-color: var(--accent-color);
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(220,38,38,0.25);
+        }
+        .premium-pagination .page-item.disabled .page-link {
+            color: var(--text-muted);
+            opacity: 0.5;
+            background-color: #f8fafc;
+            border-color: #e2e8f0;
+        }
     </style>
 </head>
 <body>
@@ -116,34 +189,41 @@
                     </div>
                 </div>
                 <div class="col-lg-4 text-lg-end">
-                    <div class="filter-dropdown">
-                        <button type="button" id="toggle-filter-btn" class="btn btn-filter" onclick="toggleFilterPanel()">
-                            Filter <i class="bi bi-chevron-down ms-2"></i>
-                        </button>
-                        <div id="filter-panel" class="filter-dropdown-panel">
-                            <h6>Filter date range</h6>
-                            <div class="row g-2 mb-3">
-                                <div class="col-6">
-                                    <label class="form-label small text-uppercase text-muted">From</label>
-                                    <input type="date" name="start_date" class="form-control form-control-sm" value="{{ request('start_date') }}">
+                    <div class="d-flex align-items-center justify-content-end gap-2 flex-wrap">
+                        <div id="active-filter-badge" class="filter-badge" style="display:none !important;">
+                            <i class="bi bi-calendar3" style="font-size:0.8rem;"></i>
+                            <span id="active-filter-label"></span>
+                            <button type="button" class="badge-clear" onclick="clearDateFilter()" title="Hapus filter tanggal">&times;</button>
+                        </div>
+                        <div class="filter-dropdown" style="position:relative;">
+                            <button type="button" id="toggle-filter-btn" class="btn btn-filter" onclick="toggleFilterPanel()">
+                                Filter <i class="bi bi-chevron-down ms-2"></i>
+                            </button>
+                            <div id="filter-panel" class="filter-dropdown-panel">
+                                <h6>Filter date range</h6>
+                                <div class="row g-2 mb-3">
+                                    <div class="col-6">
+                                        <label class="form-label small text-uppercase text-muted">From</label>
+                                        <input type="date" name="start_date" class="form-control form-control-sm" value="{{ request('start_date') }}">
+                                    </div>
+                                    <div class="col-6">
+                                        <label class="form-label small text-uppercase text-muted">To</label>
+                                        <input type="date" name="end_date" class="form-control form-control-sm" value="{{ request('end_date') }}">
+                                    </div>
                                 </div>
-                                <div class="col-6">
-                                    <label class="form-label small text-uppercase text-muted">To</label>
-                                    <input type="date" name="end_date" class="form-control form-control-sm" value="{{ request('end_date') }}">
+                                <div class="preset-list d-grid gap-2 mb-3">
+                                    <button type="button" class="btn btn-light" onclick="setPreset('today')" data-preset="today">Today</button>
+                                    <button type="button" class="btn btn-light" onclick="setPreset('yesterday')" data-preset="yesterday">Yesterday</button>
+                                    <button type="button" class="btn btn-light" onclick="setPreset('thisMonth')" data-preset="thisMonth">This Month</button>
+                                    <button type="button" class="btn btn-light" onclick="setPreset('pastMonth')" data-preset="pastMonth">Past Month</button>
+                                    <button type="button" class="btn btn-light" onclick="setPreset('past3Months')" data-preset="past3Months">Past 3 Months</button>
                                 </div>
-                            </div>
-                            <div class="preset-list d-grid gap-2 mb-3">
-                                <button type="button" class="btn btn-light" onclick="setPreset('today')">Today</button>
-                                <button type="button" class="btn btn-light" onclick="setPreset('yesterday')">Yesterday</button>
-                                <button type="button" class="btn btn-light" onclick="setPreset('thisMonth')">This Month</button>
-                                <button type="button" class="btn btn-light" onclick="setPreset('pastMonth')">Past Month</button>
-                                <button type="button" class="btn btn-light" onclick="setPreset('past3Months')">Past 3 Months</button>
-                            </div>
-                            <div class="d-flex gap-2">
-                                <button type="submit" class="btn btn-accent flex-grow-1">Apply</button>
-                                @if(request('start_date') || request('end_date'))
-                                    <a href="{{ route('surat-kehilangan.index') }}" class="btn btn-outline-secondary">Reset</a>
-                                @endif
+                                <div class="d-flex gap-2">
+                                    <button type="submit" class="btn btn-accent flex-grow-1">Apply</button>
+                                    @if(request('start_date') || request('end_date'))
+                                        <a href="{{ route('surat-kehilangan.index') }}" class="btn btn-outline-secondary">Reset</a>
+                                    @endif
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -154,7 +234,7 @@
 
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h2 class="h5 mb-0 fw-bold section-title">Daftar Surat</h2>
-        <a href="{{ route('surat-kehilangan.export-excel') }}" class="btn btn-export"><i class="bi bi-file-earmark-excel me-2"></i>Export Excel</a>
+        <a href="{{ route('surat-kehilangan.export-excel', request()->only(['cari', 'start_date', 'end_date'])) }}" class="btn btn-export"><i class="bi bi-file-earmark-excel me-2"></i>Export Excel</a>
     </div>
 
     <div class="card-premium overflow-hidden">
@@ -197,7 +277,7 @@
                                     <form action="{{ route('surat-kehilangan.destroy', $surat) }}" method="POST" class="d-inline">
                                         @csrf
                                         @method('DELETE')
-                                        <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+                                        <button type="button" class="btn btn-sm btn-outline-danger btn-delete" data-nopo="{{ $surat->nopo }}"><i class="bi bi-trash"></i></button>
                                     </form>
                                 </div>
                             </td>
@@ -215,6 +295,16 @@
                     @endforelse
                 </tbody>
             </table>
+        </div>
+        <div class="d-flex justify-content-between align-items-center p-3 border-top bg-light flex-wrap gap-2">
+            <div id="pagination-info" class="small text-muted">
+                Menampilkan 0 - 0 dari 0 data
+            </div>
+            <nav aria-label="Navigasi Halaman">
+                <ul id="pagination-controls" class="pagination pagination-sm mb-0 premium-pagination">
+                    <!-- Tombol halaman akan di-render di sini oleh JavaScript -->
+                </ul>
+            </nav>
         </div>
     </div>
 </div>
@@ -241,11 +331,40 @@
 </div>
 @endif
 
+<div class="modal fade confirm-modal" id="confirm-delete-modal" tabindex="-1" aria-labelledby="confirm-delete-title" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirm-delete-title">Konfirmasi Hapus Data</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+            </div>
+            <div class="modal-body">
+                <div class="confirm-icon">
+                    <i class="bi bi-exclamation-circle"></i>
+                </div>
+                <p class="mb-2 fw-semibold text-dark">Apakah Anda yakin ingin menghapus data laporan ini?</p>
+                <p class="mb-0">No. Polisi: <span class="fw-semibold text-dark" id="delete-nopo-label"></span></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-accent px-4" id="btn-confirm-delete">Ya, Hapus Data</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
 let debounceTimer;
+let pendingDeleteForm = null;
 const searchInput = document.querySelector('input[name="cari"]');
 const tableBody = document.querySelector('.table-premium tbody');
+const confirmDeleteModal = document.getElementById('confirm-delete-modal');
+
+// Pagination variables
+let currentSurats = @json($surats);
+let currentPage = 1;
+const itemsPerPage = 10;
 
 function debounce(func, wait) {
     clearTimeout(debounceTimer);
@@ -254,15 +373,21 @@ function debounce(func, wait) {
 
 async function performSearch(query) {
     try {
-        const response = await fetch(`{{ route('surat-kehilangan.search') }}?query=${encodeURIComponent(query)}`);
+        const startDate = document.querySelector('input[name="start_date"]')?.value || '';
+        const endDate = document.querySelector('input[name="end_date"]')?.value || '';
+        const response = await fetch(`{{ route('surat-kehilangan.search') }}?query=${encodeURIComponent(query)}&start_date=${encodeURIComponent(startDate)}&end_date=${encodeURIComponent(endDate)}`);
         const data = await response.json();
-        renderTable(data.surats);
+        currentSurats = data.surats;
+        renderTable(currentSurats, 1);
     } catch (error) {
         console.error('Error fetching search results:', error);
     }
 }
 
-function renderTable(surats) {
+function renderTable(surats, page = 1) {
+    currentPage = page;
+    const paginationInfo = document.getElementById('pagination-info');
+    
     if (surats.length === 0) {
         tableBody.innerHTML = `
             <tr>
@@ -275,38 +400,114 @@ function renderTable(surats) {
                 </td>
             </tr>
         `;
+        if (paginationInfo) paginationInfo.textContent = 'Menampilkan 0 - 0 dari 0 data';
+        renderPaginationControls(0, 1);
         return;
     }
 
-    tableBody.innerHTML = surats.map((surat, index) => `
-        <tr>
-            <td>${index + 1}</td>
-            <td class="no-surat-cell"><span>${escapeHtml(surat.nomer_surat)}</span></td>
-            <td><strong>${escapeHtml(surat.nopo)}</strong></td>
-            <td>
-                ${escapeHtml(surat.merk)}
-                <span class="meta-label">${escapeHtml(surat.jenis)}</span>
-            </td>
-            <td>${escapeHtml(surat.bpkb)}</td>
-            <td>
-                ${escapeHtml(surat.jenissurat)}
-                ${surat.jenis_surat ? `<span class="meta-label">${escapeHtml(surat.jenis_surat)}</span>` : ''}
-            </td>
-            <td>${escapeHtml(surat.taggalttd)}</td>
-            <td>
-                <div class="d-flex gap-2 flex-wrap">
-                    <a href="/surat-kehilangan/${surat.id}/edit" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil-square"></i></a>
-                    <a href="/surat-kehilangan/${surat.id}/download" class="btn btn-sm btn-outline-success"><i class="bi bi-download"></i></a>
-                    <form action="/surat-kehilangan/${surat.id}" method="POST" class="d-inline">
-                        <input type="hidden" name="_token" value="${document.querySelector('meta[name="csrf-token"]')?.content || ''}">
-                        <input type="hidden" name="_method" value="DELETE">
-                        <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
-                    </form>
-                </div>
-            </td>
-        </tr>
-    `).join('');
+    const start = (page - 1) * itemsPerPage;
+    const end = Math.min(start + itemsPerPage, surats.length);
+    const paginatedSurats = surats.slice(start, end);
+
+    tableBody.innerHTML = paginatedSurats.map((surat, index) => {
+        const globalIndex = start + index + 1;
+        return `
+            <tr>
+                <td>${globalIndex}</td>
+                <td class="no-surat-cell"><span>${escapeHtml(surat.nomer_surat)}</span></td>
+                <td><strong>${escapeHtml(surat.nopo)}</strong></td>
+                <td>
+                    ${escapeHtml(surat.merk)}
+                    <span class="meta-label">${escapeHtml(surat.jenis)}</span>
+                </td>
+                <td>${escapeHtml(surat.bpkb)}</td>
+                <td>
+                    ${escapeHtml(surat.jenissurat)}
+                    ${surat.jenis_surat ? `<span class="meta-label">${escapeHtml(surat.jenis_surat)}</span>` : ''}
+                </td>
+                <td>${escapeHtml(surat.taggalttd)}</td>
+                <td>
+                    <div class="d-flex gap-2 flex-wrap">
+                        <a href="/surat-kehilangan/${surat.id}/edit" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil-square"></i></a>
+                        <a href="/surat-kehilangan/${surat.id}/download" class="btn btn-sm btn-outline-success"><i class="bi bi-download"></i></a>
+                        <form action="/surat-kehilangan/${surat.id}" method="POST" class="d-inline">
+                            <input type="hidden" name="_token" value="${document.querySelector('meta[name="csrf-token"]')?.content || ''}">
+                            <input type="hidden" name="_method" value="DELETE">
+                            <button type="button" class="btn btn-sm btn-outline-danger btn-delete" data-nopo="${escapeHtml(surat.nopo)}"><i class="bi bi-trash"></i></button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+        `;
+    }).join('');
+
+    if (paginationInfo) {
+        paginationInfo.textContent = `Menampilkan ${start + 1} - ${end} dari ${surats.length} data`;
+    }
+    renderPaginationControls(surats.length, page);
 }
+
+function renderPaginationControls(totalItems, page) {
+    const totalPages = Math.ceil(totalItems / itemsPerPage);
+    const paginationControls = document.getElementById('pagination-controls');
+    
+    if (!paginationControls) return;
+    
+    if (totalPages <= 1) {
+        paginationControls.innerHTML = '';
+        return;
+    }
+    
+    let html = '';
+    
+    // Button Previous
+    html += `
+        <li class="page-item ${page === 1 ? 'disabled' : ''}">
+            <a class="page-link" href="#" onclick="changePage(${page - 1}); return false;" aria-label="Previous">
+                <span aria-hidden="true">&laquo;</span>
+            </a>
+        </li>
+    `;
+    
+    // Page numbers
+    const maxVisiblePages = 5;
+    let startPage = Math.max(1, page - Math.floor(maxVisiblePages / 2));
+    let endPage = startPage + maxVisiblePages - 1;
+    
+    if (endPage > totalPages) {
+        endPage = totalPages;
+        startPage = Math.max(1, endPage - maxVisiblePages + 1);
+    }
+    
+    for (let i = startPage; i <= endPage; i++) {
+        html += `
+            <li class="page-item ${page === i ? 'active' : ''}">
+                <a class="page-link" href="#" onclick="changePage(${i}); return false;">${i}</a>
+            </li>
+        `;
+    }
+    
+    // Button Next
+    html += `
+        <li class="page-item ${page === totalPages ? 'disabled' : ''}">
+            <a class="page-link" href="#" onclick="changePage(${page + 1}); return false;" aria-label="Next">
+                <span aria-hidden="true">&raquo;</span>
+            </a>
+        </li>
+    `;
+    
+    paginationControls.innerHTML = html;
+}
+
+window.changePage = function(page) {
+    const totalPages = Math.ceil(currentSurats.length / itemsPerPage);
+    if (page < 1 || page > totalPages) return;
+    renderTable(currentSurats, page);
+    const tableWrapper = document.querySelector('.table-responsive');
+    if (tableWrapper) {
+        tableWrapper.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+};
 
 function escapeHtml(text) {
     if (!text) return '';
@@ -353,11 +554,51 @@ function setPreset(range) {
         start.value = format(from);
         end.value = format(to);
     }
+
+    // Highlight tombol preset yang aktif
+    document.querySelectorAll('.preset-list button').forEach(btn => btn.classList.remove('active'));
+    const activeBtn = document.querySelector(`.preset-list button[data-preset="${range}"]`);
+    if (activeBtn) activeBtn.classList.add('active');
+}
+
+function formatDateDisplay(dateStr) {
+    if (!dateStr) return '';
+    const months = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+    const d = new Date(dateStr);
+    return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
+}
+
+function updateFilterBadge() {
+    const startInput = document.querySelector('input[name="start_date"]');
+    const endInput   = document.querySelector('input[name="end_date"]');
+    const badge      = document.getElementById('active-filter-badge');
+    const label      = document.getElementById('active-filter-label');
+    if (!badge || !label) return;
+
+    const startVal = startInput?.value || '';
+    const endVal   = endInput?.value   || '';
+
+    if (startVal && endVal) {
+        label.textContent = `${formatDateDisplay(startVal)}  –  ${formatDateDisplay(endVal)}`;
+        badge.style.removeProperty('display');
+    } else {
+        badge.style.setProperty('display', 'none', 'important');
+    }
+}
+
+function clearDateFilter() {
+    document.querySelector('input[name="start_date"]').value = '';
+    document.querySelector('input[name="end_date"]').value   = '';
+    document.querySelectorAll('.preset-list button').forEach(btn => btn.classList.remove('active'));
+    updateFilterBadge();
+    // Submit form to reload page without date filter
+    document.querySelector('form[method="GET"]').submit();
 }
 
 document.addEventListener('click', function(event) {
-    const dropdown = document.querySelector('.filter-dropdown');
-    if (!dropdown.contains(event.target)) {
+    const filterWrapper = document.querySelector('#filter-panel');
+    const toggleBtn = document.getElementById('toggle-filter-btn');
+    if (!filterWrapper.contains(event.target) && !toggleBtn.contains(event.target)) {
         closeFilterPanel();
     }
 });
@@ -372,11 +613,30 @@ searchInput.addEventListener('input', function() {
     debounce(() => performSearch(query), 300);
 });
 
-@if(session('success'))
-document.addEventListener('DOMContentLoaded', function () {
-    new bootstrap.Modal(document.getElementById('feedback-modal')).show();
+tableBody.addEventListener('click', function (event) {
+    const deleteBtn = event.target.closest('.btn-delete');
+    if (!deleteBtn) {
+        return;
+    }
+
+    pendingDeleteForm = deleteBtn.closest('form');
+    document.getElementById('delete-nopo-label').textContent = deleteBtn.dataset.nopo || '-';
+    new bootstrap.Modal(confirmDeleteModal).show();
 });
-@endif
+
+document.getElementById('btn-confirm-delete').addEventListener('click', function () {
+    if (pendingDeleteForm) {
+        pendingDeleteForm.submit();
+    }
+});
+
+document.addEventListener('DOMContentLoaded', function () {
+    renderTable(currentSurats, 1);
+    updateFilterBadge();
+    @if(session('success'))
+    new bootstrap.Modal(document.getElementById('feedback-modal')).show();
+    @endif
+});
 </script>
 </body>
 </html>

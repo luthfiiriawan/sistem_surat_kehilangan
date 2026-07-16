@@ -92,7 +92,9 @@
     <div class="container" style="max-width: 1200px;">
         <div class="d-flex justify-content-between align-items-center">
             <div class="d-flex align-items-center gap-3">
-                <img src="{{ asset('images/logo_tik_polri.png') }}" alt="Logo TIK POLRI" style="height: 52px; width: auto; opacity: 0.9;">
+                <a href="{{ route('surat-kehilangan.index') }}" style="cursor: pointer;">
+                    <img src="{{ asset('images/logo_tik_polri.png') }}" alt="Logo TIK POLRI" style="height: 52px; width: auto; opacity: 0.9;">
+                </a>
                 <div>
                     <h1 class="h4 mb-1 fw-bold">Edit Surat</h1>
                     <p class="mb-0 small text-white-50">Perbarui Data Surat Kehilangan</p>
@@ -209,7 +211,7 @@
                 </div>
                 <div class="col-md-6">
                     <label class="form-label">Tanggal Lapor <span class="text-danger">*</span></label>
-                    <input type="date" name="tanggal_tahun_lapor" class="form-control" value="{{ $suratKehilangan->tanggal_tahun_lapor }}" required>
+                    <input type="date" name="tanggal_tahun_lapor" class="form-control" value="{{ $suratKehilangan->tanggal_tahun_lapor_form }}" required>
                 </div>
                 <div class="col-md-6">
                     <label class="form-label">Jenis Surat <span class="text-danger">*</span></label>
@@ -231,7 +233,7 @@
                 </div>
                 <div class="col-md-6">
                     <label class="form-label">Tanggal TTD <span class="text-danger">*</span></label>
-                    <input type="date" name="taggalttd" class="form-control" value="{{ $suratKehilangan->taggalttd }}" required>
+                    <input type="date" name="taggalttd" class="form-control" value="{{ $suratKehilangan->taggalttd_form }}" required>
                 </div>
             </div>
         </div>

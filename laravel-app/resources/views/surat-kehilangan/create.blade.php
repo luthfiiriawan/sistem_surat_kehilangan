@@ -96,7 +96,9 @@
     <div class="container" style="max-width: 1200px;">
         <div class="d-flex justify-content-between align-items-center">
             <div class="d-flex align-items-center gap-3">
-                <img src="{{ asset('images/logo_tik_polri.png') }}" alt="Logo TIK POLRI" style="height: 52px; width: auto; opacity: 0.9;">
+                <a href="{{ route('surat-kehilangan.index') }}" style="cursor: pointer;">
+                    <img src="{{ asset('images/logo_tik_polri.png') }}" alt="Logo TIK POLRI" style="height: 52px; width: auto; opacity: 0.9;">
+                </a>
                 <div>
                     <h1 class="h4 mb-1 fw-bold">Formulir Pembuatan Surat</h1>
                     <p class="mb-0 small text-white-50">Sistem Surat Kehilangan Bid TIK POLRI</p>

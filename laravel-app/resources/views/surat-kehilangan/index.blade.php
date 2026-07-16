@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Sistem Surat Kehilangan Bid TIK POLRI</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
@@ -89,7 +90,9 @@
     <div class="container" style="max-width: 1200px;">
         <div class="d-flex justify-content-between align-items-center">
             <div class="d-flex align-items-center gap-3">
-                <img src="{{ asset('images/logo_tik_polri.png') }}" alt="Logo TIK POLRI" style="height: 52px; width: auto; opacity: 0.9;">
+                <a href="{{ route('surat-kehilangan.index') }}" style="cursor: pointer;">
+                    <img src="{{ asset('images/logo_tik_polri.png') }}" alt="Logo TIK POLRI" style="height: 52px; width: auto; opacity: 0.9;">
+                </a>
                 <div>
                     <h1 class="h4 mb-1 fw-bold">Sistem Surat Kehilangan</h1>
                     <p class="mb-0 small text-white-50">Daftar Hasil Pengecekan Kehilangan BPKB / STNK</p>
@@ -117,7 +120,7 @@
                         <button type="button" id="toggle-filter-btn" class="btn btn-filter" onclick="toggleFilterPanel()">
                             Filter <i class="bi bi-chevron-down ms-2"></i>
                         </button>
-                        <div id="filter-panel" class="filter-dropdown-panel {{ request('start_date') || request('end_date') ? 'show' : '' }}">
+                        <div id="filter-panel" class="filter-dropdown-panel">
                             <h6>Filter date range</h6>
                             <div class="row g-2 mb-3">
                                 <div class="col-6">
@@ -170,9 +173,9 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @forelse($surats as $surat)
+                    @forelse($surats as $index => $surat)
                         <tr>
-                            <td>{{ $surat->id }}</td>
+                            <td>{{ $index + 1 }}</td>
                             <td class="no-surat-cell"><span>{{ $surat->nomer_surat }}</span></td>
                             <td><strong>{{ $surat->nopo }}</strong></td>
                             <td>
@@ -240,6 +243,78 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
+let debounceTimer;
+const searchInput = document.querySelector('input[name="cari"]');
+const tableBody = document.querySelector('.table-premium tbody');
+
+function debounce(func, wait) {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(func, wait);
+}
+
+async function performSearch(query) {
+    try {
+        const response = await fetch(`{{ route('surat-kehilangan.search') }}?query=${encodeURIComponent(query)}`);
+        const data = await response.json();
+        renderTable(data.surats);
+    } catch (error) {
+        console.error('Error fetching search results:', error);
+    }
+}
+
+function renderTable(surats) {
+    if (surats.length === 0) {
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="8">
+                    <div class="empty-state">
+                        <i class="bi bi-journal-x"></i>
+                        <h4>Belum ada data.</h4>
+                        <p>Gunakan filter di atas atau buat surat baru untuk melihat daftar laporan kehilangan.</p>
+                    </div>
+                </td>
+            </tr>
+        `;
+        return;
+    }
+
+    tableBody.innerHTML = surats.map((surat, index) => `
+        <tr>
+            <td>${index + 1}</td>
+            <td class="no-surat-cell"><span>${escapeHtml(surat.nomer_surat)}</span></td>
+            <td><strong>${escapeHtml(surat.nopo)}</strong></td>
+            <td>
+                ${escapeHtml(surat.merk)}
+                <span class="meta-label">${escapeHtml(surat.jenis)}</span>
+            </td>
+            <td>${escapeHtml(surat.bpkb)}</td>
+            <td>
+                ${escapeHtml(surat.jenissurat)}
+                ${surat.jenis_surat ? `<span class="meta-label">${escapeHtml(surat.jenis_surat)}</span>` : ''}
+            </td>
+            <td>${escapeHtml(surat.taggalttd)}</td>
+            <td>
+                <div class="d-flex gap-2 flex-wrap">
+                    <a href="/surat-kehilangan/${surat.id}/edit" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil-square"></i></a>
+                    <a href="/surat-kehilangan/${surat.id}/download" class="btn btn-sm btn-outline-success"><i class="bi bi-download"></i></a>
+                    <form action="/surat-kehilangan/${surat.id}" method="POST" class="d-inline">
+                        <input type="hidden" name="_token" value="${document.querySelector('meta[name="csrf-token"]')?.content || ''}">
+                        <input type="hidden" name="_method" value="DELETE">
+                        <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+                    </form>
+                </div>
+            </td>
+        </tr>
+    `).join('');
+}
+
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
 function toggleFilterPanel() {
     const panel = document.getElementById('filter-panel');
     panel.classList.toggle('show');
@@ -285,6 +360,16 @@ document.addEventListener('click', function(event) {
     if (!dropdown.contains(event.target)) {
         closeFilterPanel();
     }
+});
+
+// Close filter panel when form is submitted
+document.querySelector('form[method="GET"]').addEventListener('submit', function() {
+    closeFilterPanel();
+});
+
+searchInput.addEventListener('input', function() {
+    const query = this.value;
+    debounce(() => performSearch(query), 300);
 });
 
 @if(session('success'))

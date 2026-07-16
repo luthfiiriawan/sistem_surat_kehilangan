@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Storage;
 use PhpOffice\PhpWord\TemplateProcessor;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use Carbon\Carbon;
 
 class SuratKehilanganController extends Controller
 {
@@ -35,6 +36,39 @@ class SuratKehilanganController extends Controller
         return view('surat-kehilangan.index', compact('surats'));
     }
 
+    public function search(Request $request)
+    {
+        $keyword = $request->input('query', '');
+        $query = SuratKehilangan::query();
+
+        if ($keyword) {
+            // Prioritize matches that start with the keyword
+            $query->where(function ($q) use ($keyword) {
+                $q->where('nopo', 'like', "{$keyword}%")
+                  ->orWhere('bpkb', 'like', "{$keyword}%")
+                  ->orWhere('merk', 'like', "{$keyword}%")
+                  ->orWhere('nopo', 'like', "%{$keyword}%")
+                  ->orWhere('bpkb', 'like', "%{$keyword}%")
+                  ->orWhere('merk', 'like', "%{$keyword}%");
+            });
+        }
+
+        $surats = $query->latest()->get()->map(function ($surat) use ($keyword) {
+            // Calculate relevance score to sort by
+            $score = 0;
+            if (str_starts_with(strtolower($surat->nopo), strtolower($keyword))) $score += 3;
+            if (str_starts_with(strtolower($surat->bpkb), strtolower($keyword))) $score += 3;
+            if (str_starts_with(strtolower($surat->merk), strtolower($keyword))) $score += 3;
+            if (str_contains(strtolower($surat->nopo), strtolower($keyword))) $score += 1;
+            if (str_contains(strtolower($surat->bpkb), strtolower($keyword))) $score += 1;
+            if (str_contains(strtolower($surat->merk), strtolower($keyword))) $score += 1;
+            $surat->relevance_score = $score;
+            return $surat;
+        })->sortByDesc('relevance_score')->values();
+
+        return response()->json(['surats' => $surats]);
+    }
+
     public function create()
     {
         return view('surat-kehilangan.create');
@@ -48,9 +82,10 @@ class SuratKehilanganController extends Controller
         $data['nomor_mesin'] = strtoupper($data['nomor_mesin']);
         $data['bpkb'] = strtoupper($data['bpkb']);
 
-        SuratKehilangan::create($data);
+        $surat = SuratKehilangan::create($data);
 
-        return redirect()->route('surat-kehilangan.index')->with('success', 'Data berhasil disimpan.');
+        // Generate dan download file Word
+        return $this->download($surat);
     }
 
     public function show(SuratKehilangan $suratKehilangan)
@@ -85,19 +120,41 @@ class SuratKehilanganController extends Controller
 
     public function download(SuratKehilangan $suratKehilangan)
     {
-        $templatePath = base_path('..\template_surat.docx');
+        $templatePath = base_path('../template_surat.docx');
         if (!file_exists($templatePath)) {
             abort(404, 'Template surat tidak ditemukan.');
         }
 
         $templateProcessor = new TemplateProcessor($templatePath);
-        $templateProcessor->setValues($suratKehilangan->toArray());
 
-        $tmpPath = storage_path('app/temp/' . uniqid('surat_', true) . '.docx');
-        Storage::disk('local')->makeDirectory('temp');
+        // Set values with formatted dates for template
+        $templateProcessor->setValue('nomer_surat', $suratKehilangan->nomer_surat);
+        $templateProcessor->setValue('bulan', $suratKehilangan->bulan);
+        $templateProcessor->setValue('tahun', $suratKehilangan->tahun);
+        $templateProcessor->setValue('nopo', $suratKehilangan->nopo);
+        $templateProcessor->setValue('merk', $suratKehilangan->merk);
+        $templateProcessor->setValue('jenis', $suratKehilangan->jenis);
+        $templateProcessor->setValue('tahun_pembuatan', $suratKehilangan->tahun_pembuatan);
+        $templateProcessor->setValue('warna', $suratKehilangan->warna);
+        $templateProcessor->setValue('nomor_rangka', $suratKehilangan->nomor_rangka);
+        $templateProcessor->setValue('nomor_mesin', $suratKehilangan->nomor_mesin);
+        $templateProcessor->setValue('bpkb', $suratKehilangan->bpkb);
+        $templateProcessor->setValue('polres', $suratKehilangan->polres);
+        $templateProcessor->setValue('nomor_surat_keterangan', $suratKehilangan->nomor_surat_keterangan);
+        $templateProcessor->setValue('tanggal_tahun_lapor', $suratKehilangan->tanggal_tahun_lapor_template);
+        $templateProcessor->setValue('jenissurat', $suratKehilangan->jenissurat);
+        $templateProcessor->setValue('jenis_surat', $suratKehilangan->jenis_surat);
+        $templateProcessor->setValue('taggalttd', $suratKehilangan->taggalttd_template);
+
+        $tempDir = storage_path('app/temp');
+        if (!is_dir($tempDir)) {
+            mkdir($tempDir, 0755, true);
+        }
+        $tmpPath = $tempDir . '/' . uniqid('surat_', true) . '.docx';
         $templateProcessor->saveAs($tmpPath);
 
-        return response()->download($tmpPath, 'SKET_Kehilangan_' . $suratKehilangan->nopo . '.docx')->deleteFileAfterSend(true);
+        $safeNopo = preg_replace('/[^A-Za-z0-9]/', '_', $suratKehilangan->nopo);
+        return response()->download($tmpPath, 'SKET_Kehilangan_' . $safeNopo . '.docx')->deleteFileAfterSend(true);
     }
 
     public function exportExcel(Request $request)

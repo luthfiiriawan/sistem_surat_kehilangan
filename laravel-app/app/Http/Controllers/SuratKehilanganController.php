@@ -84,8 +84,7 @@ class SuratKehilanganController extends Controller
 
         $surat = SuratKehilangan::create($data);
 
-        // Generate dan download file Word
-        return $this->download($surat);
+        return redirect()->route('surat-kehilangan.index')->with('success', 'Surat berhasil disimpan.');
     }
 
     public function show(SuratKehilangan $suratKehilangan)

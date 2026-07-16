@@ -32,12 +32,43 @@
         .section-title { margin:0; font-size:1rem; font-weight:700; color:var(--primary-color); }
         .section-subtitle { margin:0; font-size:0.9rem; color:#6b7280; }
         .form-label { font-size:0.82rem; font-weight:600; color:var(--primary-color); margin-bottom:8px; }
-        .form-control, .form-select { border:1px solid rgba(203,213,225,0.95); border-radius:14px; padding:12px 16px; background:#f8fafc; }
+        .form-control, .form-select { border:1px solid rgba(203,213,225,0.95); border-radius:14px; padding:12px 16px; background:#f8fafc; color:#111827; }
         .form-control:focus, .form-select:focus { border-color:rgba(220,38,38,0.8); box-shadow:0 0 0 0.15rem rgba(220,38,38,0.12); }
         .form-control::placeholder { color:#9ca3af; }
+        .form-select:invalid { color:#9ca3af; }
+        .form-select { color:#111827; }
+        .form-select option { color:#111827; }
+        #jenissurat-select option[value=""] { color:#9ca3af; }
+        #jenissurat-select { color:#9ca3af; }
+        #jenissurat-select:valid { color:#111827; }
         .btn-accent { background:linear-gradient(135deg, var(--accent-color), var(--accent-hover)); color:#fff; border:none; font-weight:700; border-radius:14px; min-width:160px; }
         .btn-secondary { background:#6b7280; color:#fff; border:none; font-weight:700; border-radius:14px; }
         .field-note { font-size:0.82rem; color:#6b7280; }
+        .jenis-surat-field {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+        .jenis-surat-field .form-select,
+        .jenis-surat-field .form-control {
+            flex: 1;
+            min-width: 0;
+        }
+        .jenis-surat-switch {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.92rem;
+            color: #fff;
+            background: rgba(17,24,39,0.95);
+            border: 1px solid rgba(255,255,255,0.9);
+            border-radius: 14px;
+            padding: 0.7rem 1rem;
+            cursor: pointer;
+            flex-shrink: 0;
+            margin-top: 0.4rem;
+        }
+        .jenis-surat-switch:hover { background: #111827; color: #fff; }
     </style>
 </head>
 <body>
@@ -74,7 +105,7 @@
             <div class="col-md-4">
                 <label class="form-label">Bulan <span class="text-danger">*</span></label>
                 <select name="bulan" class="form-select" required>
-                    <option value="">Pilih Bulan (Romawi)</option>
+                    <option value="" disabled hidden selected>Pilih Bulan (Romawi)</option>
                     <option>I</option>
                     <option>II</option>
                     <option>III</option>
@@ -154,7 +185,7 @@
             <div class="col-md-6">
                 <label class="form-label">Polres Pelapor <span class="text-danger">*</span></label>
                 <select name="polres" class="form-select" required>
-                    <option value="">Pilih Polres Pelapor</option>
+                    <option value="" disabled hidden selected>Pilih Polres Pelapor</option>
                     <option>Polres Banjar</option>
                     <option>Polres Bogor</option>
                     <option>Polrestabes Bandung</option>
@@ -187,17 +218,21 @@
                 <label class="form-label">Tanggal Lapor <span class="text-danger">*</span></label>
                 <input type="date" name="tanggal_tahun_lapor" class="form-control" required>
             </div>
-            <div class="col-md-6 position-relative">
+            <div class="col-md-6">
                 <label class="form-label">Jenis Surat <span class="text-danger">*</span></label>
-                <div style="position:relative;">
+                <div class="jenis-surat-field">
                     <select id="jenissurat-select" class="form-select" onchange="onJenisSuratChange(this.value)">
-                        <option value="">Pilih Jenis Surat</option>
+                        <option value="" disabled hidden selected>Pilih Jenis Surat</option>
                         <option value="STNK">STNK</option>
                         <option value="BPKB">BPKB</option>
                         <option value="BPKB dan STNK">BPKB dan STNK</option>
                         <option value="Lainnya">Lainnya</option>
                     </select>
-                    <input type="text" id="jenissurat-custom" class="form-control" placeholder="Tulis jenis surat lainnya" style="display:none; position:absolute; inset:0; width:100%; height:100%; background:#f8fafc; border:1px solid rgba(203,213,225,0.95);" oninput="syncJenisSuratValue(this.value)">
+                    <input type="text" id="jenissurat-custom" class="form-control" placeholder="Tulis jenis surat lainnya" style="display:none;" oninput="syncJenisSuratValue(this.value)">
+                    <button type="button" class="jenis-surat-switch" id="jenis-surat-switch" style="display:none;" onclick="showJenisSuratSelect()">
+                        <i class="bi bi-arrow-left"></i>
+                        Kembali
+                    </button>
                 </div>
                 <input type="hidden" name="jenissurat" id="jenissurat-value" required>
             </div>
@@ -215,18 +250,40 @@
 </div>
 <script>
     function onJenisSuratChange(value) {
+        const select = document.getElementById('jenissurat-select');
         const custom = document.getElementById('jenissurat-custom');
         const hidden = document.getElementById('jenissurat-value');
+        const switchBtn = document.getElementById('jenis-surat-switch');
 
         if (value === 'Lainnya') {
+            select.style.display = 'none';
             custom.style.display = 'block';
             custom.value = '';
             hidden.value = '';
+            switchBtn.style.display = 'inline-flex';
             custom.focus();
         } else {
+            select.style.display = 'block';
             custom.style.display = 'none';
             hidden.value = value;
+            switchBtn.style.display = 'none';
+            select.style.color = '#111827';
         }
+    }
+
+    function showJenisSuratSelect() {
+        const select = document.getElementById('jenissurat-select');
+        const custom = document.getElementById('jenissurat-custom');
+        const hidden = document.getElementById('jenissurat-value');
+        const switchBtn = document.getElementById('jenis-surat-switch');
+
+        select.style.display = 'block';
+        select.value = '';
+        select.style.color = '#9ca3af';
+        custom.style.display = 'none';
+        switchBtn.style.display = 'none';
+        hidden.value = '';
+        select.focus();
     }
 
     function syncJenisSuratValue(value) {

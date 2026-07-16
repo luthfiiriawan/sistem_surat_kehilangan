@@ -73,6 +73,15 @@
         .empty-state .bi { font-size: 2.5rem; color: #9ca3af; }
         .empty-state h4 { margin-top: 18px; font-weight: 700; color: var(--primary-color); }
         .empty-state p { margin-bottom: 0; }
+        .feedback-modal .modal-dialog { max-width: 520px; }
+        .feedback-modal .modal-content { border: none; border-radius: 24px; overflow: hidden; box-shadow: 0 24px 80px rgba(15, 23, 42, 0.2); }
+        .feedback-modal .modal-header { background: #f8fafc; border-bottom: 1px solid rgba(203, 213, 225, 0.9); padding: 1.5rem 2rem; }
+        .feedback-modal .modal-title { font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 1.35rem; color: var(--primary-color); }
+        .feedback-modal .modal-body { padding: 2rem 2.25rem 2.25rem; color: #4b5563; line-height: 1.7; text-align: center; }
+        .feedback-modal .modal-body p { font-size: 1.05rem; margin-bottom: 0; }
+        .feedback-modal .modal-footer { border-top: 1px solid rgba(203, 213, 225, 0.9); padding: 1.25rem 2rem 1.75rem; justify-content: center; }
+        .feedback-modal .modal-footer .btn { min-width: 160px; padding: 0.75rem 1.5rem; font-size: 1rem; }
+        .feedback-modal .feedback-icon { width: 80px; height: 80px; border-radius: 20px; background: rgba(22, 163, 74, 0.12); color: #16a34a; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; margin: 0 auto 1.5rem; }
     </style>
 </head>
 <body>
@@ -92,12 +101,6 @@
 </header>
 
 <div class="container mb-5 content-layer" style="max-width: 1200px;">
-    @if(session('success'))
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            {{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    @endif
 
     <div class="card-premium p-4 mb-4">
         <div class="section-legend mb-3"><i class="bi bi-search"></i> Filter & Pencarian</div>
@@ -212,6 +215,30 @@
         </div>
     </div>
 </div>
+
+@if(session('success'))
+<div class="modal fade feedback-modal" id="feedback-modal" tabindex="-1" aria-labelledby="feedback-modal-title" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="feedback-modal-title">Berhasil</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+            </div>
+            <div class="modal-body">
+                <div class="feedback-icon">
+                    <i class="bi bi-check-circle"></i>
+                </div>
+                <p class="fw-semibold text-dark">{{ session('success') }}</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-accent px-4" data-bs-dismiss="modal">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+@endif
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
 function toggleFilterPanel() {
     const panel = document.getElementById('filter-panel');
@@ -259,6 +286,12 @@ document.addEventListener('click', function(event) {
         closeFilterPanel();
     }
 });
+
+@if(session('success'))
+document.addEventListener('DOMContentLoaded', function () {
+    new bootstrap.Modal(document.getElementById('feedback-modal')).show();
+});
+@endif
 </script>
 </body>
 </html>

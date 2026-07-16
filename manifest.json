@@ -1,0 +1,20 @@
+{
+  "short_name": "Bid TIK POLRI",
+  "name": "Sistem Surat Kehilangan Bid TIK POLRI",
+  "icons": [
+    {
+      "src": "logo_tik.jpg",
+      "type": "image/jpeg",
+      "sizes": "192x192"
+    },
+    {
+      "src": "logo_tik.jpg",
+      "type": "image/jpeg",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "index.php",
+  "background_color": "#111827",
+  "theme_color": "#dc2626",
+  "display": "standalone"
+}

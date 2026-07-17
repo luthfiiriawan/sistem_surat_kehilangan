@@ -156,6 +156,58 @@
             background-color: #f8fafc;
             border-color: #e2e8f0;
         }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .stat-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            box-shadow: 0 4px 20px rgba(15,23,42,0.03);
+            padding: 0.85rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+            min-height: 0;
+        }
+        .stat-card-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.05rem;
+            flex-shrink: 0;
+        }
+        .stat-card-icon.total { background: rgba(17, 24, 39, 0.08); color: var(--primary-color); }
+        .stat-card-icon.stnk { background: rgba(37, 99, 235, 0.1); color: #2563eb; }
+        .stat-card-icon.bpkb { background: rgba(22, 163, 74, 0.1); color: #16a34a; }
+        .stat-card-icon.keduanya { background: rgba(124, 58, 237, 0.1); color: #7c3aed; }
+        .stat-card-icon.lainnya { background: rgba(234, 88, 12, 0.1); color: #ea580c; }
+        .stat-card-value {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            line-height: 1.1;
+        }
+        .stat-card-label {
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            line-height: 1.3;
+            margin-top: 0.15rem;
+        }
+        @media (max-width: 991.98px) {
+            .stats-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        }
+        @media (max-width: 575.98px) {
+            .stats-grid { grid-template-columns: 1fr; }
+        }
     </style>
 </head>
 <body>
@@ -230,6 +282,44 @@
                 </div>
             </div>
         </form>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-card-icon total"><i class="bi bi-files"></i></div>
+            <div>
+                <div class="stat-card-value" id="stat-total">{{ $stats['total'] }}</div>
+                <div class="stat-card-label">Jumlah Surat</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-card-icon stnk"><i class="bi bi-card-text"></i></div>
+            <div>
+                <div class="stat-card-value" id="stat-stnk">{{ $stats['stnk'] }}</div>
+                <div class="stat-card-label">Surat STNK</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-card-icon bpkb"><i class="bi bi-journal-check"></i></div>
+            <div>
+                <div class="stat-card-value" id="stat-bpkb">{{ $stats['bpkb'] }}</div>
+                <div class="stat-card-label">Surat BPKB</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-card-icon keduanya"><i class="bi bi-collection"></i></div>
+            <div>
+                <div class="stat-card-value" id="stat-keduanya">{{ $stats['keduanya'] }}</div>
+                <div class="stat-card-label">Surat Keduanya</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-card-icon lainnya"><i class="bi bi-three-dots"></i></div>
+            <div>
+                <div class="stat-card-value" id="stat-lainnya">{{ $stats['lainnya'] }}</div>
+                <div class="stat-card-label">Surat Lainnya</div>
+            </div>
+        </div>
     </div>
 
     <div class="d-flex justify-content-between align-items-center mb-3">
@@ -363,6 +453,7 @@ const confirmDeleteModal = document.getElementById('confirm-delete-modal');
 
 // Pagination variables
 let currentSurats = @json($surats);
+let currentStats = @json($stats);
 let currentPage = 1;
 const itemsPerPage = 10;
 
@@ -378,6 +469,8 @@ async function performSearch(query) {
         const response = await fetch(`{{ route('surat-kehilangan.search') }}?query=${encodeURIComponent(query)}&start_date=${encodeURIComponent(startDate)}&end_date=${encodeURIComponent(endDate)}`);
         const data = await response.json();
         currentSurats = data.surats;
+        currentStats = data.stats;
+        updateStatsCards(currentStats);
         renderTable(currentSurats, 1);
     } catch (error) {
         console.error('Error fetching search results:', error);
@@ -516,6 +609,25 @@ function escapeHtml(text) {
     return div.innerHTML;
 }
 
+function updateStatsCards(stats) {
+    if (!stats) return;
+
+    const mapping = {
+        total: 'stat-total',
+        stnk: 'stat-stnk',
+        bpkb: 'stat-bpkb',
+        keduanya: 'stat-keduanya',
+        lainnya: 'stat-lainnya',
+    };
+
+    Object.entries(mapping).forEach(([key, elementId]) => {
+        const element = document.getElementById(elementId);
+        if (element) {
+            element.textContent = stats[key] ?? 0;
+        }
+    });
+}
+
 function toggleFilterPanel() {
     const panel = document.getElementById('filter-panel');
     panel.classList.toggle('show');
@@ -631,6 +743,7 @@ document.getElementById('btn-confirm-delete').addEventListener('click', function
 });
 
 document.addEventListener('DOMContentLoaded', function () {
+    updateStatsCards(currentStats);
     renderTable(currentSurats, 1);
     updateFilterBadge();
     @if(session('success'))

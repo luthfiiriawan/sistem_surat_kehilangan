@@ -12,50 +12,22 @@ use Carbon\Carbon;
 
 class SuratKehilanganController extends Controller
 {
+    private const JENIS_SURAT_STNK = 'STNK';
+    private const JENIS_SURAT_BPKB = 'BPKB';
+    private const JENIS_SURAT_KEDUANYA = 'BPKB dan STNK';
+
     public function index(Request $request)
     {
-        $query = SuratKehilangan::query();
+        $surats = $this->buildFilteredQuery($request)->latest()->get();
+        $stats = $this->computeStats($surats);
 
-        if ($request->filled('cari')) {
-            $keyword = $request->input('cari');
-            $query->where(function ($q) use ($keyword) {
-                $q->where('nopo', 'like', "%{$keyword}%")
-                    ->orWhere('bpkb', 'like', "%{$keyword}%")
-                    ->orWhere('merk', 'like', "%{$keyword}%");
-            });
-        }
-
-        if ($request->filled('start_date') && $request->filled('end_date')) {
-            $query->whereDate('tanggal_tahun_lapor', '>=', $request->input('start_date'))
-                ->whereDate('tanggal_tahun_lapor', '<=', $request->input('end_date'));
-        }
-
-        $surats = $query->latest()->get();
-
-        return view('surat-kehilangan.index', compact('surats'));
+        return view('surat-kehilangan.index', compact('surats', 'stats'));
     }
 
     public function search(Request $request)
     {
         $keyword = $request->input('query', '');
-        $query = SuratKehilangan::query();
-
-        if ($keyword) {
-            // Prioritize matches that start with the keyword
-            $query->where(function ($q) use ($keyword) {
-                $q->where('nopo', 'like', "{$keyword}%")
-                  ->orWhere('bpkb', 'like', "{$keyword}%")
-                  ->orWhere('merk', 'like', "{$keyword}%")
-                  ->orWhere('nopo', 'like', "%{$keyword}%")
-                  ->orWhere('bpkb', 'like', "%{$keyword}%")
-                  ->orWhere('merk', 'like', "%{$keyword}%");
-            });
-        }
-
-        if ($request->filled('start_date') && $request->filled('end_date')) {
-            $query->whereDate('tanggal_tahun_lapor', '>=', $request->input('start_date'))
-                ->whereDate('tanggal_tahun_lapor', '<=', $request->input('end_date'));
-        }
+        $query = $this->buildFilteredQuery($request, $keyword);
 
         $surats = $query->latest()->get()->map(function ($surat) use ($keyword) {
             // Calculate relevance score to sort by
@@ -70,7 +42,10 @@ class SuratKehilanganController extends Controller
             return $surat;
         })->sortByDesc('relevance_score')->values();
 
-        return response()->json(['surats' => $surats]);
+        return response()->json([
+            'surats' => $surats,
+            'stats' => $this->computeStats($surats),
+        ]);
     }
 
     public function create()
@@ -162,23 +137,7 @@ class SuratKehilanganController extends Controller
 
     public function exportExcel(Request $request)
     {
-        $query = SuratKehilangan::query();
-
-        if ($request->filled('cari')) {
-            $keyword = $request->input('cari');
-            $query->where(function ($q) use ($keyword) {
-                $q->where('nopo', 'like', "%{$keyword}%")
-                    ->orWhere('bpkb', 'like', "%{$keyword}%")
-                    ->orWhere('merk', 'like', "%{$keyword}%");
-            });
-        }
-
-        if ($request->filled('start_date') && $request->filled('end_date')) {
-            $query->whereDate('tanggal_tahun_lapor', '>=', $request->input('start_date'))
-                ->whereDate('tanggal_tahun_lapor', '<=', $request->input('end_date'));
-        }
-
-        $rows = $query->orderBy('id')->get();
+        $rows = $this->buildFilteredQuery($request)->orderBy('id')->get();
 
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
@@ -214,5 +173,46 @@ class SuratKehilanganController extends Controller
         $writer->save($tmpPath);
 
         return response()->download($tmpPath, 'DataSuratKehilangan.xlsx')->deleteFileAfterSend(true);
+    }
+
+    private function buildFilteredQuery(Request $request, ?string $searchKeyword = null)
+    {
+        $query = SuratKehilangan::query();
+        $keyword = $searchKeyword ?? $request->input('cari');
+
+        if ($keyword) {
+            $query->where(function ($q) use ($keyword) {
+                $q->where('nopo', 'like', "{$keyword}%")
+                    ->orWhere('bpkb', 'like', "{$keyword}%")
+                    ->orWhere('merk', 'like', "{$keyword}%")
+                    ->orWhere('nopo', 'like', "%{$keyword}%")
+                    ->orWhere('bpkb', 'like', "%{$keyword}%")
+                    ->orWhere('merk', 'like', "%{$keyword}%");
+            });
+        }
+
+        if ($request->filled('start_date') && $request->filled('end_date')) {
+            $query->whereDate('tanggal_tahun_lapor', '>=', $request->input('start_date'))
+                ->whereDate('tanggal_tahun_lapor', '<=', $request->input('end_date'));
+        }
+
+        return $query;
+    }
+
+    private function computeStats($surats): array
+    {
+        $knownTypes = [
+            self::JENIS_SURAT_STNK,
+            self::JENIS_SURAT_BPKB,
+            self::JENIS_SURAT_KEDUANYA,
+        ];
+
+        return [
+            'total' => $surats->count(),
+            'stnk' => $surats->where('jenissurat', self::JENIS_SURAT_STNK)->count(),
+            'bpkb' => $surats->where('jenissurat', self::JENIS_SURAT_BPKB)->count(),
+            'keduanya' => $surats->where('jenissurat', self::JENIS_SURAT_KEDUANYA)->count(),
+            'lainnya' => $surats->reject(fn ($surat) => in_array($surat->jenissurat, $knownTypes, true))->count(),
+        ];
     }
 }

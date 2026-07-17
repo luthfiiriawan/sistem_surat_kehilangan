@@ -42,4 +42,33 @@ class SuratKehilanganTest extends TestCase
         $response->assertRedirect('/surat-kehilangan');
         $this->assertDatabaseCount('surat_kehilangans', 1);
     }
+
+    public function test_can_export_excel(): void
+    {
+        \App\Models\SuratKehilangan::create([
+            'nomer_surat' => '123',
+            'bulan' => 'I',
+            'tahun' => '2026',
+            'nopo' => 'B 1234 CD',
+            'merk' => 'Honda Vario',
+            'jenis' => 'Sepeda Motor',
+            'tahun_pembuatan' => '2021',
+            'warna' => 'Hitam',
+            'nomor_rangka' => 'RANGKA001',
+            'nomor_mesin' => 'MESIN001',
+            'bpkb' => 'BPKB001',
+            'polres' => 'Polres Bandung',
+            'nomor_surat_keterangan' => 'SK-001',
+            'tanggal_tahun_lapor' => '2026-07-13',
+            'jenissurat' => 'BPKB',
+            'jenis_surat' => 'BPKB',
+            'taggalttd' => '2026-07-13',
+        ]);
+
+        $response = $this->get(route('surat-kehilangan.export-excel'));
+
+        $response->assertStatus(200);
+        $response->assertHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        $response->assertHeader('Content-Disposition', 'attachment; filename=DataSuratKehilangan.xlsx');
+    }
 }

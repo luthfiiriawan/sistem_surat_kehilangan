@@ -8,6 +8,9 @@ use Illuminate\Http\Request;
 use PhpOffice\PhpWord\TemplateProcessor;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
 use Carbon\Carbon;
 
 class SuratKehilanganController extends Controller
@@ -137,32 +140,236 @@ class SuratKehilanganController extends Controller
 
     public function exportExcel(Request $request)
     {
-        $rows = $this->buildFilteredQuery($request)->orderBy('id')->get();
+        // Ubah pengurutan agar data yang baru ditambahkan berada di paling atas
+        $rows = $this->buildFilteredQuery($request)->latest('id')->get();
 
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
         $sheet->setTitle('Data Surat Kehilangan');
 
-        $headers = ['NO', 'POLRES', 'NO POLISI', 'MERK / BRAND', 'JENIS KENDARAAN', 'TAHUN', 'NOMOR RANGKA', 'NOMOR MESIN', 'NOMOR BPKB', 'NO LAPORAN'];
-        $sheet->fromArray([$headers], null, 'A2');
-        $sheet->setCellValue('A1', 'DATA SURAT KETERANGAN KEHILANGAN');
-        $sheet->mergeCells('A1:J1');
+        // Pastikan garis kisi (gridlines) tetap terlihat setelah diberi fill style
+        $sheet->setShowGridlines(true);
 
+        // Tulis judul di baris A1
+        $sheet->setCellValue('A1', 'DATA SURAT KETERANGAN KEHILANGAN');
+        $sheet->mergeCells('A1:R1');
+
+        // Setup Group Headers (Row 2) dan Sub Headers (Row 3)
+        $sheet->mergeCells('A2:A3');
+        $sheet->setCellValue('A2', 'NO');
+
+        $sheet->mergeCells('B2:G2');
+        $sheet->setCellValue('B2', 'INFORMASI SURAT & LAPORAN');
+
+        $sheet->mergeCells('H2:J2');
+        $sheet->setCellValue('H2', 'DOKUMEN KEHILANGAN');
+
+        $sheet->mergeCells('K2:R2');
+        $sheet->setCellValue('K2', 'IDENTITAS KENDARAAN');
+
+        // Sub Headers (Row 3)
+        $subHeaders = [
+            'B3' => 'NO. SURAT',
+            'C3' => 'BULAN',
+            'D3' => 'TAHUN',
+            'E3' => 'POLRES',
+            'F3' => 'NO. LAPORAN',
+            'G3' => 'TANGGAL LAPOR',
+            'H3' => 'JENIS DOKUMEN',
+            'I3' => 'DETAIL DOKUMEN',
+            'J3' => 'TANGGAL TTD',
+            'K3' => 'NO. POLISI',
+            'L3' => 'MERK / BRAND',
+            'M3' => 'JENIS KENDARAAN',
+            'N3' => 'TAHUN PEMBUATAN',
+            'O3' => 'WARNA',
+            'P3' => 'NOMOR RANGKA',
+            'Q3' => 'NOMOR MESIN',
+            'R3' => 'NOMOR BPKB',
+        ];
+
+        foreach ($subHeaders as $cell => $value) {
+            $sheet->setCellValue($cell, $value);
+        }
+
+        // Tulis Baris Data mulai dari baris 4 (A4)
         $counter = 1;
         $sheet->fromArray($rows->map(function ($row) use (&$counter) {
             return [
                 $counter++,
+                $row->nomer_surat,
+                $row->bulan,
+                $row->tahun,
                 $row->polres,
+                $row->nomor_surat_keterangan,
+                $row->tanggal_tahun_lapor_template,
+                $row->jenissurat,
+                $row->jenis_surat,
+                $row->taggalttd_template,
                 $row->nopo,
                 $row->merk,
                 $row->jenis,
                 $row->tahun_pembuatan,
+                $row->warna,
                 $row->nomor_rangka,
                 $row->nomor_mesin,
                 $row->bpkb,
-                $row->nomor_surat_keterangan,
             ];
-        })->toArray(), null, 'A3');
+        })->toArray(), null, 'A4');
+
+        $lastRow = 3 + count($rows);
+
+        // Styling untuk Baris Judul (A1)
+        $sheet->getRowDimension(1)->setRowHeight(40);
+        $sheet->getStyle('A1')->applyFromArray([
+            'font' => [
+                'name' => 'Segoe UI',
+                'bold' => true,
+                'size' => 16,
+                'color' => ['rgb' => '1F4E79'],
+            ],
+            'alignment' => [
+                'horizontal' => Alignment::HORIZONTAL_CENTER,
+                'vertical' => Alignment::VERTICAL_CENTER,
+            ],
+        ]);
+
+        // Styling untuk Baris Group Header (A2:R2)
+        $sheet->getRowDimension(2)->setRowHeight(28);
+        $sheet->getStyle('A2:R2')->applyFromArray([
+            'font' => [
+                'name' => 'Segoe UI',
+                'bold' => true,
+                'size' => 11,
+                'color' => ['rgb' => 'FFFFFF'],
+            ],
+            'fill' => [
+                'fillType' => Fill::FILL_SOLID,
+                'startColor' => ['rgb' => '1F4E79'],
+            ],
+            'alignment' => [
+                'horizontal' => Alignment::HORIZONTAL_CENTER,
+                'vertical' => Alignment::VERTICAL_CENTER,
+            ],
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => Border::BORDER_THIN,
+                    'color' => ['rgb' => 'D3D3D3'],
+                ],
+            ],
+        ]);
+
+        // Styling untuk Baris Sub Header (A3:R3)
+        $sheet->getRowDimension(3)->setRowHeight(24);
+        $sheet->getStyle('A3:R3')->applyFromArray([
+            'font' => [
+                'name' => 'Segoe UI',
+                'bold' => true,
+                'size' => 10,
+                'color' => ['rgb' => 'FFFFFF'],
+            ],
+            'fill' => [
+                'fillType' => Fill::FILL_SOLID,
+                'startColor' => ['rgb' => '2F5597'],
+            ],
+            'alignment' => [
+                'horizontal' => Alignment::HORIZONTAL_CENTER,
+                'vertical' => Alignment::VERTICAL_CENTER,
+            ],
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => Border::BORDER_THIN,
+                    'color' => ['rgb' => 'D3D3D3'],
+                ],
+            ],
+        ]);
+
+        // Styling khusus untuk sel 'NO' yang di-merge (A2:A3)
+        $sheet->getStyle('A2:A3')->applyFromArray([
+            'font' => [
+                'name' => 'Segoe UI',
+                'bold' => true,
+                'size' => 11,
+                'color' => ['rgb' => 'FFFFFF'],
+            ],
+            'fill' => [
+                'fillType' => Fill::FILL_SOLID,
+                'startColor' => ['rgb' => '1F4E79'],
+            ],
+            'alignment' => [
+                'horizontal' => Alignment::HORIZONTAL_CENTER,
+                'vertical' => Alignment::VERTICAL_CENTER,
+            ],
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => Border::BORDER_THIN,
+                    'color' => ['rgb' => 'D3D3D3'],
+                ],
+            ],
+        ]);
+
+        // Styling untuk Baris Data (A4 s/d selesai)
+        for ($i = 4; $i <= $lastRow; $i++) {
+            $sheet->getRowDimension($i)->setRowHeight(22);
+            
+            $sheet->getStyle('A' . $i . ':R' . $i)->applyFromArray([
+                'font' => [
+                    'name' => 'Segoe UI',
+                    'size' => 10,
+                ],
+                'alignment' => [
+                    'vertical' => Alignment::VERTICAL_CENTER,
+                ],
+                'borders' => [
+                    'allBorders' => [
+                        'borderStyle' => Border::BORDER_THIN,
+                        'color' => ['rgb' => 'E0E0E0'],
+                    ],
+                ],
+            ]);
+
+            // Zebra striping selang-seling (baris genap diberi latar belakang sangat soft)
+            if ($i % 2 === 0) {
+                $sheet->getStyle('A' . $i . ':R' . $i)->applyFromArray([
+                    'fill' => [
+                        'fillType' => Fill::FILL_SOLID,
+                        'startColor' => ['rgb' => 'F2F6FA'],
+                    ],
+                ]);
+            }
+
+            // Perataan kolom tertentu agar rapi
+            $sheet->getStyle('A' . $i)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER); // NO
+            $sheet->getStyle('C' . $i)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER); // BULAN
+            $sheet->getStyle('D' . $i)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER); // TAHUN
+            $sheet->getStyle('G' . $i)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER); // TANGGAL LAPOR
+            $sheet->getStyle('J' . $i)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER); // TANGGAL TTD
+            $sheet->getStyle('K' . $i)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER); // NO POLISI
+            $sheet->getStyle('N' . $i)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER); // TAHUN PEMBUATAN
+        }
+
+        // Kalkulasi lebar kolom secara dinamis dengan margin aman (+4 karakter) dan batas minimal
+        // Dimulai dari baris 3 (sub-headers) ke bawah agar tidak terpengaruh merge cells di baris 1 & 2
+        $columns = range('A', 'R');
+        foreach ($columns as $col) {
+            if ($col === 'A') {
+                $sheet->getColumnDimension($col)->setWidth(6);
+                continue;
+            }
+            
+            $maxLength = 0;
+            // Panjang teks sub-header (Row 3)
+            $headerVal = $sheet->getCell($col . '3')->getValue();
+            $maxLength = max($maxLength, strlen((string)$headerVal));
+            
+            // Panjang teks data (Row 4 ke bawah)
+            for ($row = 4; $row <= $lastRow; $row++) {
+                $cellVal = $sheet->getCell($col . $row)->getValue();
+                $maxLength = max($maxLength, strlen((string)$cellVal));
+            }
+            
+            $sheet->getColumnDimension($col)->setWidth(max($maxLength + 4, 12));
+        }
 
         $tempDir = storage_path('app/temp');
         if (!is_dir($tempDir)) {
